@@ -1,21 +1,33 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react'
+import { createStackNavigator } from '@react-navigation/stack'
+import { Routes } from './src/Routes'
+import { LoadAssets } from './src/components'
+import LiquidSwipe from './src/LiquidSwipe'
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+const assets: number[] | undefined = []
+
+const { Navigator, Screen } = createStackNavigator<Routes>()
+
+const AppNavigator = () => (
+	<Navigator>
+		<Screen
+			name="LiquidSwipe"
+			component={LiquidSwipe}
+			options={{
+				title: 'Liquid Swipe',
+				header: () => null,
+				gestureEnabled: false,
+			}}
+		/>
+	</Navigator>
+)
+
+const App = () => {
+	return (
+		<LoadAssets assets={assets}>
+			<AppNavigator />
+		</LoadAssets>
+	)
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App
