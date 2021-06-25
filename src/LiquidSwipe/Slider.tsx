@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 
-import Wave, { MARGIN_WIDTH, Side, WIDTH } from "./Wave";
+import Wave, { HEIGHT, MARGIN_WIDTH, MIN_LEDGE, Side, WIDTH } from "./Wave";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
@@ -11,9 +11,10 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { snapPoint, useVector } from "react-native-redash";
+import Button from "./Button";
 
-const PREV = WIDTH;
-const NEXT = 0;
+// const PREV = WIDTH;
+// const NEXT = 0;
 
 interface SliderProps {
   index: number;
@@ -30,13 +31,13 @@ const Slider = ({
   next,
   setIndex,
 }: SliderProps) => {
-  const hasPrev = !!prev;
-  const hasNext = !!next;
+  // const hasPrev = !!prev;
+  // const hasNext = !!next;
   const activeSide = useSharedValue(Side.NONE);
   const isTransitioningLeft = useSharedValue<boolean>(false);
   const isTransitioningRight = useSharedValue<boolean>(false);
-  const left = useVector();
-  const right = useVector();
+  const left = useVector(0, HEIGHT / 2);
+  const right = useVector(0, HEIGHT / 2);
 
   const onGestureEvent = useAnimatedGestureHandler({
     onStart: ({ x }) => {
@@ -59,9 +60,10 @@ const Slider = ({
     },
     onEnd: ({ x, velocityX, velocityY }) => {
       if (activeSide.value === Side.LEFT) {
-        const snapPoints = [MARGIN_WIDTH, WIDTH];
+        const snapPoints = [MIN_LEDGE, WIDTH];
         const dest = snapPoint(x, velocityX, snapPoints);
         isTransitioningLeft.value = dest === WIDTH;
+        left.y.value = withSpring(HEIGHT / 2, { velocity: velocityY });
         left.x.value = withSpring(
           dest,
           {
@@ -77,9 +79,10 @@ const Slider = ({
           }
         );
       } else if (activeSide.value === Side.RIGHT) {
-        const snapPoints = [WIDTH - MARGIN_WIDTH, 0];
+        const snapPoints = [WIDTH - MIN_LEDGE, 0];
         const dest = snapPoint(x, velocityX, snapPoints);
         isTransitioningRight.value = dest === 0;
+        right.y.value = withSpring(HEIGHT / 2, { velocity: velocityY });
         right.x.value = withSpring(
           WIDTH - dest,
           {
@@ -99,8 +102,8 @@ const Slider = ({
   });
 
   useEffect(() => {
-    left.x.value = withSpring(MARGIN_WIDTH);
-    right.x.value = withSpring(MARGIN_WIDTH);
+    left.x.value = withSpring(MIN_LEDGE);
+    right.x.value = withSpring(MIN_LEDGE);
   }, [left.x, right.x]);
 
   const leftStyle = useAnimatedStyle(() => ({
@@ -113,16 +116,30 @@ const Slider = ({
         {current}
         {prev && (
           <Animated.View style={[StyleSheet.absoluteFill, leftStyle]}>
-            <Wave side={Side.LEFT} position={left}>
+            <Wave
+              side={Side.LEFT}
+              position={left}
+              isTransitioning={isTransitioningLeft}
+            >
               {prev}
             </Wave>
+            <Button position={left} side={Side.LEFT} activeSide={activeSide} />
           </Animated.View>
         )}
         {next && (
           <View style={StyleSheet.absoluteFill}>
-            <Wave side={Side.RIGHT} position={right}>
+            <Wave
+              side={Side.RIGHT}
+              position={right}
+              isTransitioning={isTransitioningRight}
+            >
               {next}
             </Wave>
+            <Button
+              position={right}
+              side={Side.RIGHT}
+              activeSide={activeSide}
+            />
           </View>
         )}
       </Animated.View>
