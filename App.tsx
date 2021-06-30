@@ -1,21 +1,40 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react'
+import { createStackNavigator } from '@react-navigation/stack'
+import { Routes } from './src/Routes'
+import { LoadAssets } from './src/components'
+import LiquidSwipe, { assets as liquidSwipeAssets } from './src/LiquidSwipe'
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+const fonts = {
+	'SFProDisplay-Bold': require('./src/assets/fonts/SFPro/SF-Pro-Display-Bold.otf'),
+	'SFProDisplay-Semibold': require('./src/assets/fonts/SFPro/SF-Pro-Display-Semibold.otf'),
+	'SFProDisplay-Regular': require('./src/assets/fonts/SFPro/SF-Pro-Display-Regular.otf'),
+	'SFProDisplay-Medium': require('./src/assets/fonts/SFPro/SF-Pro-Display-Medium.otf'),
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const assets: number[] | undefined = [...liquidSwipeAssets]
+
+const { Navigator, Screen } = createStackNavigator<Routes>()
+
+const AppNavigator = () => (
+	<Navigator>
+		<Screen
+			name="LiquidSwipe"
+			component={LiquidSwipe}
+			options={{
+				title: 'Liquid Swipe',
+				header: () => null,
+				gestureEnabled: false,
+			}}
+		/>
+	</Navigator>
+)
+
+const App = () => {
+	return (
+		<LoadAssets assets={assets} fonts={fonts}>
+			<AppNavigator />
+		</LoadAssets>
+	)
+}
+
+export default App
